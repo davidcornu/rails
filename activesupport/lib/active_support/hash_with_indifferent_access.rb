@@ -64,12 +64,18 @@ module ActiveSupport
       end
     end
 
-    def default(key = nil)
-      if key.is_a?(Symbol) && include?(key = key.to_s)
-        self[key]
-      else
-        super
-      end
+    def default(*args)
+      key = args.first
+      args[0] = key.to_s if key.is_a?(Symbol)
+      super(*args)
+    end
+
+    def [](key)
+      super(convert_key(key))
+    end
+
+    def fetch(key, *args)
+      super(convert_key(key), *args)
     end
 
     def self.new_from_hash_copying_default(hash)
