@@ -96,7 +96,7 @@ module ActionDispatch
       end
 
       def score(constraints)
-        required_keys = path.required_names
+        required_keys = required_parts.map(&:to_s)
         supplied_keys = constraints.map { |k,v| v && k.to_s }.compact
 
         return -1 unless (required_keys - supplied_keys).empty?
@@ -111,11 +111,15 @@ module ActionDispatch
       alias :segment_keys :parts
 
       def format(path_options)
-        @path_formatter.evaluate path_options
+        @path_formatter.evaluate path_defaults.merge(path_options)
+      end
+
+      def path_defaults
+        @path_defaults ||= defaults.slice(*parts)
       end
 
       def required_parts
-        @required_parts ||= path.required_names.map(&:to_sym)
+        @required_parts ||= path.required_names.map(&:to_sym) - path_defaults.keys
       end
 
       def required_default?(key)
